@@ -10,6 +10,7 @@
 #include <openssl/ssl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "client.h"
 
@@ -74,7 +75,8 @@ int client(const char *conn_str, const char *ca_pem,
     BIO *sbio;
     SSL *ssl;
     size_t len;
-    int rc = 0;
+    /* Failure till we know it's a success */
+    int rc = -1;
 
     /* Initialize OpenSSL */
     SSL_load_error_strings();
@@ -82,13 +84,12 @@ int client(const char *conn_str, const char *ca_pem,
 
     /* Get a context */
     if (!(ctx = get_client_context(ca_pem, cert_pem, key_pem))) {
-        return -1;
+        return rc;
     }
 
     /* Get a BIO */
     if (!(sbio = BIO_new_ssl_connect(ctx))) {
         fprintf(stderr, "Could not get a BIO object from context\n");
-        rc = -1;
         goto fail1;
     }
 
@@ -98,21 +99,18 @@ int client(const char *conn_str, const char *ca_pem,
     /* Connect to the server */
     if (BIO_set_conn_hostname(sbio, conn_str) != 1) {
         fprintf(stderr, "Could not connecto to the server\n");
-        rc = -1;
         goto fail2;
     }
 
     /* Perform SSL handshake with the server */
     if (SSL_do_handshake(ssl) != 1) {
         fprintf(stderr, "SSL Handshake failed\n");
-        rc = -1;
         goto fail2;
     }
 
     /* Verify that SSL handshake completed successfully */
     if (SSL_get_verify_result(ssl) != X509_V_OK) {
         fprintf(stderr, "Verification of handshake failed\n");
-        rc = -1;
         goto fail2;
     }
 
@@ -122,7 +120,6 @@ int client(const char *conn_str, const char *ca_pem,
     /* Read a line from the user */
     if (!fgets(buffer, BUFSIZE, stdin)) {
         fprintf(stderr, "Could not read input from the user\n");
-        rc = -1;
         goto fail3;
     }
 
@@ -132,14 +129,12 @@ int client(const char *conn_str, const char *ca_pem,
     /* Write the input onto the SSL socket */
     if ((rc = SSL_write(ssl, buffer, (int) len)) != len) {
         fprintf(stderr, "Cannot write to the server\n");
-        rc = -1;
         goto fail3;
     }
 
     /* Read from the server */
     if ((rc = SSL_read(ssl, buffer, BUFSIZE)) < 0) {
         fprintf(stderr, "Cannot read from the server\n");
-        rc = -1;
         goto fail3;
     }
 
@@ -149,6 +144,8 @@ int client(const char *conn_str, const char *ca_pem,
         printf("%s", buffer);
     }
 
+    rc = 0;
+
     /* Cleanup and exit */
 fail3:
     BIO_ssl_shutdown(sbio);
@@ -156,5 +153,5 @@ fail2:
     BIO_free_all(sbio);
 fail1:
     SSL_CTX_free(ctx);
-    return -1;
+    return rc;
 }

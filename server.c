@@ -200,26 +200,6 @@ int server(const char *port_str, const char *ca_pem,
             }
         }
 
-        /* Echo read */
-        if ((len = SSL_read(ssl, buffer, BUFSIZE)) < 0) {
-            if (len < 0) {
-                fprintf(stderr, "SSL read on socket failed\n");
-                SSL_shutdown(ssl);
-            }
-            SSL_free(ssl);
-            continue;
-        }
-
-        /* Echo write */
-        if ((rc = SSL_write(ssl, buffer, len)) != len) {
-            if (rc < 0) {
-                fprintf(stderr, "SSL write on socket failed\n");
-                SSL_shutdown(ssl);
-            }
-            SSL_free(ssl);
-            continue;
-        }
-
         /* Successfully echoed, print on our screen as well */
         printf("%s", buffer);
 
