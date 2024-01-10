@@ -15,12 +15,12 @@
 /*
  * Print the usage of the current command line tool
  */
-void usage() {
-    fprintf(stderr, "Usage: ./a.out "
+void usage(const char * argv[]) {
+    fprintf(stderr, "Usage: %s "
             /* 2 */ "(server <port_num> | client <server_ip>:<server_port>) "
             /* 3 */ "<CAfile_pem> "
             /* 4 */ "<cert_pem> "
-            /* 5 */ "<key_pem>\n");
+            /* 5 */ "<key_pem>\n", argv[0]);
 }
 
 /*
@@ -28,12 +28,14 @@ void usage() {
  */
 int main(int argc, const char * argv[]) {
     if (argc != 6) {
-        usage(); return -1;
+        usage(argv);
+        return -1;
     } else if (!strcmp(argv[1], "server")) {
         return server(argv[2], argv[3], argv[4], argv[5]);
     } else if (!strcmp(argv[1], "client")) {
         return client(argv[2], argv[3], argv[4], argv[5]);
     } else {
-        usage(); return -1;
+        usage(argv);
+        return -1;
     }
 }
