@@ -6,7 +6,7 @@ There are a couple of things to be noted here:
 
 1. Hostname verification is not performed. If you want to perform it, you should take a look at [this repository](https://github.com/iSECPartners/ssl-conservatory).
 2. Don't plugin this code directly into multi-threaded applications, you need to call some additional routines so that OpenSSL routines become reentrant.
-3. You can generate the keys by looking at [this gist](https://gist.github.com/zapstar/4b51d7cfa74c7e709fcdaace19233443) or by using the included script `certs_gen.sh` (Uniy based OS).
+3. You can generate the keys by looking at [this gist](https://gist.github.com/zapstar/4b51d7cfa74c7e709fcdaace19233443) or by using the included script `certs_gen.sh` (Unix based OS).
 
 ## Steps to run the example
 
