@@ -1,3 +1,5 @@
 openssl
 core
 keys/
+ssl-2way
+certs/*
